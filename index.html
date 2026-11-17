@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,22 +11,26 @@
 
   <header>
     <h1>BRANCHBOUND</h1>
-    <p>Your progression starts here.</p>
+    <p>Build your own progression.</p>
   </header>
 
   <main>
     <section class="stats">
-      <h2>💎 Shards: <span id="shards">0</span></h2>
-      <h3>⚡ Per second: <span id="income">0</span></h3>
+      <h2>💎 <span id="shards">0</span> Shards</h2>
+      <h3>⚡ <span id="income">0</span> / second</h3>
     </section>
 
-    <button id="tapButton">GATHER SHARDS</button>
+    <button id="tapButton">✦ GATHER SHARDS</button>
 
     <h2>🌳 Upgrade Tree</h2>
-    <div id="upgradeTree"></div>
+    <p>Unlock connected nodes to expand your network.</p>
+
+    <div id="upgradeTree" class="tree">
+      <svg id="connections"></svg>
+      <div id="nodes"></div>
+    </div>
   </main>
 
   <script src="game.js"></script>
 </body>
 </html>
-
