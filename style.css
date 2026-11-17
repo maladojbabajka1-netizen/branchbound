@@ -1,0 +1,97 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+  background: #090d19;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+header {
+  padding: 20px 0;
+}
+
+header h1 {
+  color: #63e6e2;
+  letter-spacing: 5px;
+  font-size: 27px;
+}
+
+header p {
+  color: #8998b5;
+}
+
+.stats {
+  background: #151e33;
+  border: 1px solid #293957;
+  border-radius: 16px;
+  padding: 15px;
+  margin: 20px auto;
+  max-width: 400px;
+}
+
+.stats h2 {
+  color: #63e6e2;
+}
+
+.stats h3 {
+  color: #a78bfa;
+}
+
+#tapButton {
+  background: linear-gradient(135deg, #63e6e2, #438bdb);
+  color: #071522;
+  border: none;
+  border-radius: 15px;
+  padding: 20px 35px;
+  font-size: 17px;
+  font-weight: bold;
+  margin: 20px;
+  cursor: pointer;
+  box-shadow: 0 0 25px #63e6e244;
+}
+
+#tapButton:active {
+  transform: scale(0.95);
+}
+
+#upgradeTree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 25px;
+}
+
+.upgrade {
+  background: #17233b;
+  border: 2px solid #354969;
+  border-radius: 14px;
+  padding: 18px;
+  width: 90%;
+  max-width: 300px;
+  color: white;
+}
+
+.upgrade.available {
+  border-color: #ffd166;
+}
+
+.upgrade.unlocked {
+  border-color: #63e6e2;
+}
+
+.upgrade button {
+  margin-top: 10px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #63e6e2;
+  font-weight: bold;
+}
