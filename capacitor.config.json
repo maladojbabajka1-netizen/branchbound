@@ -1,0 +1,7 @@
+
+{
+  "appId": "com.branchbound.game",
+  "appName": "Branchbound",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
