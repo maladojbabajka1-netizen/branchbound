@@ -1,5 +1,7 @@
-// BRANCHBOUND 2.0
-// Upgrade tree + auto-save + developer tools
+// ==========================================
+// BRANCHBOUND 2.1
+// Upgrade Tree + Auto Save + Sound + Effects
+// ==========================================
 
 const SAVE_KEY = "branchbound_save_v2";
 
@@ -8,6 +10,10 @@ let income = 0;
 let tapPower = 1;
 let selectedNode = "origin";
 let unlocked = ["origin"];
+
+// ==========================================
+// UPGRADE TREE
+// ==========================================
 
 const upgrades = [
   {
@@ -18,7 +24,7 @@ const upgrades = [
     parents: [], type: "origin", value: 0
   },
 
-  // ENERGY BRANCH
+  // ENERGY
   {
     id: "spark", name: "⚡ SPARK", branch: "Energy",
     x: 150, y: 760, cost: 25,
@@ -55,7 +61,7 @@ const upgrades = [
     parents: ["reactor"], type: "tapMult", value: 10
   },
 
-  // AUTOMATION BRANCH
+  // AUTOMATION
   {
     id: "drip", name: "💧 DRIP", branch: "Automation",
     x: 300, y: 760, cost: 40,
@@ -92,7 +98,7 @@ const upgrades = [
     parents: ["factory"], type: "incomeMult", value: 3
   },
 
-  // EXPANSION BRANCH
+  // EXPANSION
   {
     id: "roots", name: "🌱 ROOTS", branch: "Expansion",
     x: 450, y: 760, cost: 60,
@@ -129,7 +135,7 @@ const upgrades = [
     parents: ["worldtree"], type: "income", value: 250
   },
 
-  // RESEARCH BRANCH
+  // RESEARCH
   {
     id: "focus", name: "🔮 FOCUS", branch: "Research",
     x: 600, y: 760, cost: 75,
@@ -166,7 +172,7 @@ const upgrades = [
     parents: ["overclock"], type: "tapMult", value: 10
   },
 
-  // ASCENSION BRANCH
+  // ASCENSION
   {
     id: "crystal", name: "💠 CRYSTAL", branch: "Ascension",
     x: 750, y: 760, cost: 100,
@@ -204,10 +210,144 @@ const upgrades = [
   }
 ];
 
+// ==========================================
+// GAME ELEMENTS
+// ==========================================
+
 const shardsDisplay = document.getElementById("shards");
 const incomeDisplay = document.getElementById("income");
 const tree = document.getElementById("nodes");
 const connections = document.getElementById("connections");
+
+// ==========================================
+// SOUND SYSTEM
+// ==========================================
+
+let soundEnabled =
+  localStorage.getItem("branchbound_sound") !== "off";
+
+let audioContext = null;
+
+function playSound(type) {
+  if (!soundEnabled) return;
+
+  try {
+    const AudioContextClass =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    if (!audioContext) {
+      audioContext = new AudioContextClass();
+    }
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+
+    const sounds = {
+      tap: [520, 760, 0.07],
+      unlock: [440, 880, 0.2],
+      menu: [330, 440, 0.1],
+      error: [180, 120, 0.13]
+    };
+
+    const [start, end, duration] =
+      sounds[type] || sounds.tap;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = "sine";
+
+    oscillator.frequency.setValueAtTime(
+      start,
+      audioContext.currentTime
+    );
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+      end,
+      audioContext.currentTime + duration
+    );
+
+    gain.gain.setValueAtTime(
+      0.0001,
+      audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.12,
+      audioContext.currentTime + 0.01
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      audioContext.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + duration);
+
+  } catch (error) {
+    console.warn("Sound unavailable:", error);
+  }
+}
+
+// Sound toggle
+const soundButton = document.createElement("button");
+soundButton.id = "soundToggle";
+document.body.appendChild(soundButton);
+
+function updateSoundButton() {
+  soundButton.textContent =
+    soundEnabled ? "🔊 SOUND ON" : "🔇 SOUND OFF";
+}
+
+soundButton.addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+
+  localStorage.setItem(
+    "branchbound_sound",
+    soundEnabled ? "on" : "off"
+  );
+
+  updateSoundButton();
+
+  if (soundEnabled) playSound("menu");
+});
+
+updateSoundButton();
+
+// ==========================================
+// ANIMATIONS
+// ==========================================
+
+function animateTap() {
+  const button = document.getElementById("tapButton");
+
+  button.classList.remove("tap-pop");
+  void button.offsetWidth;
+  button.classList.add("tap-pop");
+}
+
+function showFloatingShards(amount) {
+  const button = document.getElementById("tapButton");
+  const float = document.createElement("span");
+
+  float.className = "shard-float";
+  float.textContent = `+${formatNumber(amount)} 💎`;
+
+  button.appendChild(float);
+
+  setTimeout(() => float.remove(), 850);
+}
+
+// ==========================================
+// HELPER FUNCTIONS
+// ==========================================
 
 function getNode(id) {
   return upgrades.find(node => node.id === id);
@@ -224,35 +364,71 @@ function isAvailable(node) {
 }
 
 function formatNumber(number) {
-  if (number >= 1e12) return (number / 1e12).toFixed(2) + "T";
-  if (number >= 1e9) return (number / 1e9).toFixed(2) + "B";
-  if (number >= 1e6) return (number / 1e6).toFixed(2) + "M";
-  if (number >= 1e3) return (number / 1e3).toFixed(2) + "K";
+  if (number >= 1e12) {
+    return (number / 1e12).toFixed(2) + "T";
+  }
+
+  if (number >= 1e9) {
+    return (number / 1e9).toFixed(2) + "B";
+  }
+
+  if (number >= 1e6) {
+    return (number / 1e6).toFixed(2) + "M";
+  }
+
+  if (number >= 1e3) {
+    return (number / 1e3).toFixed(2) + "K";
+  }
+
   return Math.floor(number).toLocaleString();
 }
 
+// ==========================================
+// SAVE SYSTEM
+// ==========================================
+
 function saveGame() {
-  const save = { shards, unlocked };
-  localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+  const save = {
+    shards,
+    unlocked
+  };
+
+  localStorage.setItem(
+    SAVE_KEY,
+    JSON.stringify(save)
+  );
 }
 
 function loadGame() {
   try {
-    const save = JSON.parse(localStorage.getItem(SAVE_KEY));
+    const save = JSON.parse(
+      localStorage.getItem(SAVE_KEY)
+    );
+
     if (!save) return;
 
-    shards = Number(save.shards) || 0;
+    shards = Math.max(0, Number(save.shards) || 0);
+
     unlocked = Array.isArray(save.unlocked)
-      ? save.unlocked.filter(id => upgrades.some(node => node.id === id))
+      ? save.unlocked.filter(id =>
+          upgrades.some(node => node.id === id)
+        )
       : ["origin"];
 
-    if (!unlocked.includes("origin")) unlocked.unshift("origin");
+    if (!unlocked.includes("origin")) {
+      unlocked.unshift("origin");
+    }
 
     recalculateStats();
+
   } catch (error) {
     console.warn("Save could not be loaded:", error);
   }
 }
+
+// ==========================================
+// UPGRADE CALCULATIONS
+// ==========================================
 
 function recalculateStats() {
   income = 0;
@@ -261,9 +437,18 @@ function recalculateStats() {
   upgrades.forEach(node => {
     if (!isUnlocked(node.id)) return;
 
-    if (node.type === "income") income += node.value;
-    if (node.type === "tapMult") tapPower *= node.value;
-    if (node.type === "incomeMult") income *= node.value;
+    if (node.type === "income") {
+      income += node.value;
+    }
+
+    if (node.type === "tapMult") {
+      tapPower *= node.value;
+    }
+
+    if (node.type === "incomeMult") {
+      income *= node.value;
+    }
+
     if (node.type === "bothMult") {
       income *= node.value;
       tapPower *= node.value;
@@ -271,23 +456,30 @@ function recalculateStats() {
   });
 }
 
+// ==========================================
+// UPGRADE TREE RENDERING
+// ==========================================
+
 function renderTree() {
   tree.innerHTML = "";
   connections.innerHTML = "";
 
+  // Draw connecting lines
   upgrades.forEach(node => {
     node.parents.forEach(parentId => {
       const parent = getNode(parentId);
       if (!parent) return;
 
       const line = document.createElementNS(
-        "http://www.w3.org/2000/svg", "line"
+        "http://www.w3.org/2000/svg",
+        "line"
       );
 
       line.setAttribute("x1", parent.x);
       line.setAttribute("y1", parent.y);
       line.setAttribute("x2", node.x);
       line.setAttribute("y2", node.y);
+
       line.setAttribute(
         "class",
         isUnlocked(node.id) ? "edge active" : "edge"
@@ -297,13 +489,17 @@ function renderTree() {
     });
   });
 
+  // Create upgrade buttons
   upgrades.forEach(node => {
     const button = document.createElement("button");
+
     button.className = "node";
     button.textContent = node.name;
     button.style.left = node.x + "px";
     button.style.top = node.y + "px";
-    button.title = `${node.branch} — ${node.description}`;
+
+    button.title =
+      `${node.branch} — ${node.description}`;
 
     if (isUnlocked(node.id)) {
       button.classList.add("unlocked");
@@ -314,6 +510,7 @@ function renderTree() {
     }
 
     button.addEventListener("click", () => {
+      playSound("menu");
       selectedNode = node.id;
       showDetails();
     });
@@ -321,6 +518,10 @@ function renderTree() {
     tree.appendChild(button);
   });
 }
+
+// ==========================================
+// UPGRADE DETAILS
+// ==========================================
 
 function showDetails() {
   const node = getNode(selectedNode);
@@ -332,6 +533,7 @@ function showDetails() {
     details = document.createElement("section");
     details.id = "details";
     details.className = "details";
+
     document.querySelector("main").appendChild(details);
   }
 
@@ -349,25 +551,39 @@ function showDetails() {
   if (isUnlocked(node.id)) {
     button.textContent = "✓ UNLOCKED";
     button.disabled = true;
+
   } else if (!isAvailable(node)) {
     button.textContent = "LOCKED — UNLOCK PARENT FIRST";
     button.disabled = true;
+
   } else if (shards < node.cost) {
     button.textContent = "NOT ENOUGH SHARDS";
     button.disabled = true;
+
   } else {
     button.textContent = "UNLOCK UPGRADE";
     button.disabled = false;
   }
 
-  button.addEventListener("click", () => buyUpgrade(node));
+  button.addEventListener("click", () => {
+    buyUpgrade(node);
+  });
 }
 
+// ==========================================
+// BUY UPGRADES
+// ==========================================
+
 function buyUpgrade(node) {
-  if (!isAvailable(node) || shards < node.cost) return;
+  if (!isAvailable(node) || shards < node.cost) {
+    playSound("error");
+    return;
+  }
 
   shards -= node.cost;
   unlocked.push(node.id);
+
+  playSound("unlock");
 
   recalculateStats();
   updateUI();
@@ -376,85 +592,135 @@ function buyUpgrade(node) {
   saveGame();
 }
 
+// ==========================================
+// UI UPDATES
+// ==========================================
+
 function updateUI() {
   shardsDisplay.textContent = formatNumber(shards);
   incomeDisplay.textContent = formatNumber(income);
 
   const tapButton = document.getElementById("tapButton");
+
   if (tapButton) {
-    tapButton.textContent = `✦ GATHER SHARDS (+${formatNumber(tapPower)})`;
+    tapButton.textContent =
+      `✦ GATHER SHARDS (+${formatNumber(tapPower)})`;
   }
 
   const buyButton = document.getElementById("buyButton");
   const node = getNode(selectedNode);
 
   if (buyButton && node && !isUnlocked(node.id)) {
-    buyButton.disabled = !isAvailable(node) || shards < node.cost;
+    buyButton.disabled =
+      !isAvailable(node) || shards < node.cost;
+
     if (!isAvailable(node)) {
-      buyButton.textContent = "LOCKED — UNLOCK PARENT FIRST";
+      buyButton.textContent =
+        "LOCKED — UNLOCK PARENT FIRST";
+
     } else if (shards < node.cost) {
       buyButton.textContent = "NOT ENOUGH SHARDS";
+
     } else {
       buyButton.textContent = "UNLOCK UPGRADE";
     }
   }
 }
 
+// ==========================================
+// GATHER SHARDS
+// ==========================================
+
 document.getElementById("tapButton").addEventListener("click", () => {
   shards += tapPower;
+
+  playSound("tap");
+  animateTap();
+  showFloatingShards(tapPower);
+
   updateUI();
   saveGame();
 });
 
-// Passive production
+// ==========================================
+// PASSIVE PRODUCTION
+// ==========================================
+
 setInterval(() => {
   shards += income;
   updateUI();
 }, 1000);
 
-// Save periodically
+// ==========================================
+// AUTOMATIC SAVING
+// ==========================================
+
 setInterval(saveGame, 5000);
 
-// Developer menu
+// ==========================================
+// DEVELOPER MENU
+// ==========================================
+
 function createDeveloperMenu() {
   const devButton = document.createElement("button");
+
   devButton.id = "devToggle";
   devButton.textContent = "⚙ DEV";
+
   document.body.appendChild(devButton);
 
   const panel = document.createElement("section");
+
   panel.id = "devPanel";
+
   panel.innerHTML = `
     <h2>⚙ Developer Tools</h2>
     <p>Give yourself resources and test upgrades.</p>
-    <input id="devAmount" type="number" min="0" value="10000"
-      placeholder="Amount of shards">
+
+    <input
+      id="devAmount"
+      type="number"
+      min="0"
+      value="10000"
+      placeholder="Amount of shards"
+    >
+
     <button id="devGive">Give Shards</button>
     <button id="devUnlock">Unlock Everything</button>
     <button id="devReset">Reset Progress</button>
     <button id="devClose">Close Menu</button>
   `;
+
   document.body.appendChild(panel);
 
   devButton.addEventListener("click", () => {
+    playSound("menu");
     panel.classList.toggle("open");
   });
 
   document.getElementById("devClose").addEventListener("click", () => {
+    playSound("menu");
     panel.classList.remove("open");
   });
 
   document.getElementById("devGive").addEventListener("click", () => {
-    const amount = Math.max(0, Number(
-      document.getElementById("devAmount").value
-    ) || 0);
+    const amount = Math.max(
+      0,
+      Number(document.getElementById("devAmount").value) || 0
+    );
+
     shards += amount;
+
+    playSound("tap");
     updateUI();
     saveGame();
   });
 
   document.getElementById("devUnlock").addEventListener("click", () => {
     unlocked = upgrades.map(node => node.id);
+
+    playSound("unlock");
+
     recalculateStats();
     updateUI();
     renderTree();
@@ -468,6 +734,9 @@ function createDeveloperMenu() {
     shards = 0;
     unlocked = ["origin"];
     selectedNode = "origin";
+
+    playSound("error");
+
     recalculateStats();
     updateUI();
     renderTree();
@@ -476,9 +745,13 @@ function createDeveloperMenu() {
   });
 }
 
-// Start game
+// ==========================================
+// START GAME
+// ==========================================
+
 loadGame();
 createDeveloperMenu();
 renderTree();
 updateUI();
 showDetails();
+  
