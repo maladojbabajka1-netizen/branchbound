@@ -97,7 +97,7 @@ main {
 
 #tapButton {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   margin: 18px 0 28px;
   padding: 19px 30px;
   border: 1px solid #8fffff88;
