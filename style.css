@@ -5,22 +5,21 @@
 
 body {
   margin: 0;
-  padding: 20px;
+  padding: 18px;
   min-height: 100vh;
   background: #090d19;
-  color: #ffffff;
+  color: #eef4ff;
   font-family: Arial, sans-serif;
   text-align: center;
 }
 
 header {
-  padding: 20px 0;
+  padding: 15px;
 }
 
 header h1 {
   color: #63e6e2;
   letter-spacing: 5px;
-  font-size: 27px;
 }
 
 header p {
@@ -28,12 +27,15 @@ header p {
 }
 
 .stats {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
   background: #151e33;
   border: 1px solid #293957;
   border-radius: 16px;
-  padding: 15px;
-  margin: 20px auto;
-  max-width: 400px;
+  padding: 12px;
+  margin: 15px auto;
+  max-width: 450px;
 }
 
 .stats h2 {
@@ -49,49 +51,105 @@ header p {
   color: #071522;
   border: none;
   border-radius: 15px;
-  padding: 20px 35px;
-  font-size: 17px;
+  padding: 19px 30px;
+  font-size: 16px;
   font-weight: bold;
-  margin: 20px;
-  cursor: pointer;
+  margin: 18px;
   box-shadow: 0 0 25px #63e6e244;
 }
 
 #tapButton:active {
-  transform: scale(0.95);
+  transform: scale(.95);
 }
 
-#upgradeTree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  margin-top: 25px;
+.tree {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 500px;
+  margin: 20px auto;
+  background: radial-gradient(circle, #172744, #0d1424 75%);
+  border: 1px solid #293957;
+  border-radius: 18px;
+  overflow: auto;
 }
 
-.upgrade {
+#nodes, #connections {
+  position: absolute;
+  width: 600px;
+  height: 500px;
+  top: 0;
+  left: 0;
+}
+
+#connections {
+  pointer-events: none;
+}
+
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 85px;
+  height: 85px;
+  border-radius: 22px;
+  border: 2px solid #40516e;
   background: #17233b;
-  border: 2px solid #354969;
-  border-radius: 14px;
-  padding: 18px;
-  width: 90%;
-  max-width: 300px;
-  color: white;
-}
-
-.upgrade.available {
-  border-color: #ffd166;
-}
-
-.upgrade.unlocked {
-  border-color: #63e6e2;
-}
-
-.upgrade button {
-  margin-top: 10px;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 9px;
-  background: #63e6e2;
+  color: #aab5c9;
+  font-size: 11px;
   font-weight: bold;
+  padding: 5px;
+  z-index: 2;
+}
+
+.node.available {
+  border-color: #ffd166;
+  color: #ffd166;
+  box-shadow: 0 0 16px #ffd16644;
+}
+
+.node.unlocked {
+  border-color: #63e6e2;
+  color: #63e6e2;
+  background: #12333d;
+  box-shadow: 0 0 18px #63e6e244;
+}
+
+.node:disabled {
+  opacity: .55;
+}
+
+.edge {
+  stroke: #354969;
+  stroke-width: 5;
+}
+
+.edge.active {
+  stroke: #63e6e2;
+  filter: drop-shadow(0 0 5px #63e6e2);
+}
+
+.details {
+  max-width: 450px;
+  margin: 15px auto;
+  padding: 15px;
+  background: #151e33;
+  border: 1px solid #293957;
+  border-radius: 15px;
+}
+
+.details p {
+  color: #aab5c9;
+}
+
+#buyButton {
+  padding: 12px 20px;
+  background: #ffd166;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+}
+
+#buyButton:disabled {
+  background: #34415a;
+  color: #aab5c9;
 }
